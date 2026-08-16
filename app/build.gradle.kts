@@ -1,19 +1,23 @@
 plugins {
     alias(libs.plugins.android.application)
+    kotlin("plugin.compose")
 }
 
 android {
     namespace = "com.udb.appfinanzas"
     compileSdk {
-        version = release(36) {
+        version = release(37) {
             minorApiLevel = 1
+        }
+        buildFeatures {
+            compose = true
         }
     }
 
     defaultConfig {
         applicationId = "com.udb.appfinanzas"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -44,4 +48,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    implementation(platform("androidx.compose:compose-bom:2024.09.00"))
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.activity:activity-compose:1.9.2")
+    implementation("androidx.compose.material:material-icons-extended")
+    debugImplementation("androidx.compose.ui:ui-tooling")
 }

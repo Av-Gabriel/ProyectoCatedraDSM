@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvSaldoLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Saldo Disponible"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="32dp"
+        />
+
+    <TextView
+        android:id="@+id/tvSaldoMonto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="$500.00"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tvSaldoLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="4dp"
+        />
+
+    <TextView
+        android:id="@+id/tvIngresosMes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ingresos: $1000.00"
+        app:layout_constraintTop_toBottomOf="@id/tvSaldoMonto"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/tvGastosMes"
+        android:layout_marginTop="24dp"
+    />
+    <TextView
+        android:id="@+id/tvGastosMes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Gastos: $225.00"
+        app:layout_constraintTop_toBottomOf="@id/tvSaldoMonto"
+        app:layout_constraintStart_toEndOf="@id/tvIngresosMes"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        />
+
+    <TextView
+        android:id="@+id/tvAlerta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Presupuesto de Comida casi agotado"
+        android:textColor="#382E2B"
+        app:layout_constraintTop_toBottomOf="@id/tvIngresosMes"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        />
+
+    <Button
+        android:id="@+id/btnAgregarMovimiento"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Agregar Movimiento"
+        android:textColor="@color/black"
+        android:backgroundTint="#EAEA"
+        app:layout_constraintTop_toBottomOf="@id/tvAlerta"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp"
+        />
+    <Button
+        android:id="@+id/btnPresupuestos"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Presupuestos"
+        android:textColor="@color/black"
+        android:backgroundTint="#EAEA"
+        app:layout_constraintTop_toBottomOf="@id/btnAgregarMovimiento"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        />
+
+    <Button
+        android:id="@+id/btnHistorial"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Historial"
+        android:textColor="@color/black"
+        android:backgroundTint="#EAEA"
+        app:layout_constraintTop_toBottomOf="@id/btnPresupuestos"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        />
+
+    <Button
+        android:id="@+id/btnNoticias"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Noticias"
+        android:textColor="@color/black"
+        android:backgroundTint="#EAEA"
+        app:layout_constraintTop_toBottomOf="@id/btnHistorial"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        />
+
+    <Button
+        android:id="@+id/btnPerfil"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Perfil"
+        android:textColor="@color/black"
+        android:backgroundTint="#EAEA"
+        app:layout_constraintTop_toBottomOf="@id/btnNoticias"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        />
+</androidx.constraintlayout.widget.ConstraintLayout>
