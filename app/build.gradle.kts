@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     kotlin("plugin.compose")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -9,9 +10,10 @@ android {
         version = release(37) {
             minorApiLevel = 1
         }
-        buildFeatures {
-            compose = true
-        }
+    }
+
+    buildFeatures {
+        compose = true
     }
 
     defaultConfig {
@@ -20,7 +22,6 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -33,6 +34,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -40,6 +42,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
