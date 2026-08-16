@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -36,9 +34,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.udb.appfinanzas.auth.ui.login.LoginState
+import com.udb.appfinanzas.core.ui.navegacion.Login
 
 @Composable
 fun PantallaLogin(
+    estado: LoginState,
     onLoginClick: (String, String) -> Unit = { _, _ -> },//aqui se pondria email y password como parametros
     onOlvideClick: () -> Unit = {},
     onRegistroClick: () -> Unit = {}
@@ -131,11 +132,15 @@ fun PantallaLogin(
             // boton iniciar sesión
             Button(
                 onClick = { onLoginClick(email, password) },
+                enabled = estado !is LoginState.Cargando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
-                Text("Iniciar sesión")
+                Text(if(estado is LoginState.Cargando)"Cargando..." else "Iniciar Sesion")
+            }
+            if (estado is LoginState.Error){
+                Text(estado.mensaje, color = Color.Red)
             }
         }
 
@@ -167,6 +172,6 @@ fun PantallaLogin(
 @Composable
 fun PantallaLoginPreview(){
     MaterialTheme{
-        PantallaLogin()
+        PantallaLogin(estado = LoginState.Idle)
     }
 }

@@ -36,7 +36,8 @@ import androidx.compose.ui.unit.dp
 fun BarraMovimiento(nombreCategoria: String,
                     montoGastado: Double,
                     montoTotal: Double,
-                    modifier: Modifier = Modifier
+                    modifier: Modifier = Modifier,
+                    onClick: () -> Unit = {}
 ){
     //variable temporal porcentaje en lo que usamos una bd
     val porcentaje = if (montoTotal > 0)(montoGastado / montoTotal *100).toInt()
