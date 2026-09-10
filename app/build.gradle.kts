@@ -2,15 +2,14 @@ plugins {
     alias(libs.plugins.android.application)
     kotlin("plugin.compose")
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.hilt.android)
+
 }
 
 android {
     namespace = "com.udb.appfinanzas"
-    compileSdk {
-        version = release(37) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 37
 
     buildFeatures {
         compose = true
@@ -50,16 +49,19 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
     testImplementation(libs.junit)
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit.core)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp.logging.interceptor)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
-    implementation(platform("androidx.compose:compose-bom:2024.09.00"))
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("androidx.compose.material:material-icons-extended")
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.hilt.android)
+    "ksp"(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
 }
