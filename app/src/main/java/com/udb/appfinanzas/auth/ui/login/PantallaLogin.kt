@@ -73,7 +73,7 @@ fun PantallaLogin(
                 text = "SFM", //sobreviviendo a fin de mes
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = AppTheme.colors.iconActivo
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

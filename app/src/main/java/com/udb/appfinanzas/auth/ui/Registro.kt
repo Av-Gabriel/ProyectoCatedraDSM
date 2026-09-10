@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,20 +70,20 @@ fun PantallaRegistro(
                 imageVector = Icons.Default.Wallet,
                 contentDescription = "Logo",
                 modifier = Modifier.size(56.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = AppTheme.colors.iconActivo
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "Crear cuenta",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = AppTheme.colors.iconActivo
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Regístrate para empezar",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = AppTheme.colors.iconActivo
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -153,19 +154,20 @@ fun PantallaRegistro(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Botón registrarse
+            // boton registrarse
             Button(
                 onClick = { onRegistroClick(nombre, email, password, confirmPassword) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(AppTheme.colors.iconActivo)
                 
             ) {
                 Text("Registrarse")
             }
         }
 
-        // Volver a login fijo abajo
+        // volver a login fijo abajo
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -180,7 +182,7 @@ fun PantallaRegistro(
                 text = "Inicia sesión",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
+                color = AppTheme.colors.iconActivo,
                 modifier = Modifier.clickable { onLoginClick() }
             )
         }
