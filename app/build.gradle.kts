@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.hilt.android)
     "ksp"(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.datastore.preferences)
 }

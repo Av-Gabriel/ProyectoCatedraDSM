@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -22,7 +22,7 @@ fun NavigationWrapper() {
     NavHost(navController, startDestination = Login) {
 
         composable<Login> {
-            val loginViewModel: LoginViewModel = viewModel()
+            val loginViewModel: LoginViewModel = hiltViewModel()
             val estado by loginViewModel.estado.collectAsState()
 
             LaunchedEffect(estado) {
@@ -38,7 +38,7 @@ fun NavigationWrapper() {
         }
 
         composable<Registro> {
-            val registroViewModel: RegistroViewModel = viewModel()
+            val registroViewModel: RegistroViewModel = hiltViewModel()
             val estado by registroViewModel.estado.collectAsState()
 
             LaunchedEffect(estado) {

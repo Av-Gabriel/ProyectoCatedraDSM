@@ -3,12 +3,17 @@ package com.udb.appfinanzas.auth.ui.registro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.udb.appfinanzas.auth.data.RegistroRequest
-import com.udb.appfinanzas.network.RetrofitClient
+import com.udb.appfinanzas.network.ApiService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RegistroViewModel : ViewModel() {
+@HiltViewModel
+class RegistroViewModel @Inject constructor(
+    private val apiService: ApiService
+) : ViewModel() {
 
     private val _estado = MutableStateFlow<RegistroState>(RegistroState.Idle)
     val estado: StateFlow<RegistroState> = _estado
@@ -32,7 +37,7 @@ class RegistroViewModel : ViewModel() {
                     fechaNacimiento = null
                 )
 
-                val response = RetrofitClient.apiService.registrar(request)
+                val response = apiService.registrar(request)
 
                 if (response.isSuccessful) {
                     _estado.value = RegistroState.Exitoso

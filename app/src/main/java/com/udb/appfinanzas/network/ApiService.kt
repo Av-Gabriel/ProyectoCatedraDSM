@@ -6,6 +6,7 @@ import com.udb.appfinanzas.auth.data.RegistroRequest
 import com.udb.appfinanzas.auth.data.UserResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
@@ -15,4 +16,7 @@ interface ApiService {
 
     @POST("api/users")
     suspend fun registrar(@Body request: RegistroRequest): Response<UserResponse>
+
+    @GET("api/users")
+    suspend fun getUsers(): Response<List<UserResponse>>
 }
