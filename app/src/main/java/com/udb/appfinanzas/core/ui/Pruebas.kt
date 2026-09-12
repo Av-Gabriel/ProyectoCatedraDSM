@@ -85,6 +85,7 @@ fun ScaffoldApp(
     Scaffold(
         containerColor = AppTheme.colors.background,
         topBar = {
+            if (mostrarTopBar){
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.colors.topBar,
@@ -94,40 +95,68 @@ fun ScaffoldApp(
                 navigationIcon = navigationIcon,
                 actions = {
                     IconButton(onClick = onPerfilClick) {
-                        Icon(Icons.Default.Person, contentDescription = "perfil", tint = AppTheme.colors.onSurfaceMuted)
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "perfil",
+                            tint = AppTheme.colors.onSurfaceMuted
+                        )
                     }
                     Box {
                         IconButton(onClick = { menuExpandido = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "menu", tint = AppTheme.colors.onSurfaceMuted)
+                            Icon(
+                                Icons.Default.MoreVert,
+                                contentDescription = "menu",
+                                tint = AppTheme.colors.onSurfaceMuted
+                            )
                         }
-                        DropdownMenu(expanded = menuExpandido, onDismissRequest = { menuExpandido = false }) {
+                        DropdownMenu(
+                            expanded = menuExpandido,
+                            onDismissRequest = { menuExpandido = false }) {
                             DropdownMenuItem(
                                 text = { Text("Salir") },
                                 onClick = { menuExpandido = false; onLogoutClick() },
-                                leadingIcon = { Icon(Icons.Default.Logout, contentDescription = null) }
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Logout,
+                                        contentDescription = null
+                                    )
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text("Configuracion") },
                                 onClick = { menuExpandido = false; onConfigClick() },
-                                leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) }
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Settings,
+                                        contentDescription = null
+                                    )
+                                }
                             )
                             DropdownMenuItem(
                                 text = { Text("Historial") },
                                 onClick = { menuExpandido = false; onConfigClick() },
-                                leadingIcon = { Icon(Icons.Default.History, contentDescription = null) }
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.History,
+                                        contentDescription = null
+                                    )
+                                }
                             )
                         }
                     }
                 }
             )
+        }
         },
         bottomBar = {
+        if(mostrarBottomBar){
             BottomNavBar(
                 navController = navController,
                 destinoActual = destinoActual,
                 onAgregarClick = onAgregarClick
             )
         }
+    }
     ) { innerPadding ->
         Column(
             modifier = Modifier
