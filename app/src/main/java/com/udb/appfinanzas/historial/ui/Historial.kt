@@ -10,13 +10,11 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun Historial(){
-    ScaffoldApp(title = "Historial",
-        //puse boton de "atras" a pantallas que no sean el dashboard
-        navigationIcon = { Icon(Icons.Default.ArrowBackIosNew, contentDescription = "atras") })
-    {
+
+
         Text("contenido de historial")
     }
-}
+
 
 
 //Preview

@@ -27,8 +27,10 @@ class LoginViewModel @Inject constructor(
                 val response = apiService.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
                     val token = response.body()?.token
-                    if (token != null) {
+                    val userId = response.body()?.userId
+                    if (token != null && userId != null) {
                         tokenManager.saveToken(token)
+                        tokenManager.saveUserId(userId)
                         _estado.value = LoginState.Exitoso
                     } else {
                         _estado.value = LoginState.Error("Respuesta invalida del servidor")

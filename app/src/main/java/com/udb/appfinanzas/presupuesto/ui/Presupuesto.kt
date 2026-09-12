@@ -18,10 +18,6 @@ import com.udb.appfinanzas.core.ui.BarraMovimiento
 
 @Composable
 fun Presupuesto(){
-ScaffoldApp(title = "Presupuestos",
-    //puse boton de "atras" a pantallas que no sean el dashboard
-    navigationIcon = { Icon(Icons.Default.ArrowBackIosNew, contentDescription = "atras") })
-{
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         BarraMovimiento(
             nombreCategoria = "Comida",
@@ -38,7 +34,7 @@ ScaffoldApp(title = "Presupuestos",
     }
 }
 
-}
+
 
 //Preview
 @Preview(showBackground = true,

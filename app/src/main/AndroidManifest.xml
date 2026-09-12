@@ -19,8 +19,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".movimientos.ui.AgregarMovimiento" android:exported="false" />
-        <activity android:name=".presupuesto.ui.PresupuestosActivity" android:exported="false" />
+
         <activity android:name=".historial.ui.HistorialActivity" android:exported="false" />
         <activity android:name=".noticias.ui.NoticiasActivity" android:exported="false" />
 

@@ -1,6 +1,6 @@
 package com.udb.appfinanzas.movimientos.ui
 
-import ScaffoldApp
+
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,20 +14,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,16 +31,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.layout.Box
 
-// Importación de componentes reutilizables desde Core
 import com.udb.appfinanzas.core.ui.components.AppFilterChips
 import com.udb.appfinanzas.core.ui.components.AppListItem
 import com.udb.appfinanzas.core.ui.components.AppSearchBar
 import com.udb.appfinanzas.core.ui.components.AppSummaryCard
+import com.udb.appfinanzas.transacciones.TransaccionesState
+import com.udb.appfinanzas.transacciones.TransactionResponseDTO
 
-// -------------------------------------------------------------
-// MODELO DE DATOS Y DATOS DE PRUEBA
-// -------------------------------------------------------------
 enum class TipoMovimiento { INGRESO, GASTO }
 
 data class Movimiento(
@@ -58,48 +54,63 @@ data class Movimiento(
     val icono: ImageVector
 )
 
-private val movimientosEjemplo = listOf(
-    Movimiento("1", "Supermercado Walmart", "Comida", 125.50, TipoMovimiento.GASTO, "Hoy", "18:20", Icons.Default.ShoppingBag),
-    Movimiento("2", "Pago de Salario", "Trabajo", 2500.00, TipoMovimiento.INGRESO, "Hoy", "09:00", Icons.Default.Work),
-    Movimiento("3", "Suscripción Netflix", "Entretenimiento", 15.99, TipoMovimiento.GASTO, "Ayer", "20:15", Icons.Default.Tv),
-    Movimiento("4", "Transferencia Recibida", "Personal", 50.00, TipoMovimiento.INGRESO, "Ayer", "11:30", Icons.Default.SwapHoriz),
-    Movimiento("5", "Restaurante Italia", "Restaurante", 68.00, TipoMovimiento.GASTO, "10 Oct 2024", "21:00", Icons.Default.Restaurant)
-)
 
-// -------------------------------------------------------------
-// PANTALLA PRINCIPAL
-// -------------------------------------------------------------
-@Composable
-fun Movimientos(
-    onAtrasClick: () -> Unit = {},
-    onAgregarMovClick: () -> Unit = {},
-    onPerfilClick: () -> Unit = {},
-    onConfigClick: () -> Unit = {},
-    onLogoutClick: () -> Unit = {},
-    onMovimientoClick: (Movimiento) -> Unit = {}
-) {
-    ScaffoldApp(
-        title = "Movimientos",
-        navigationIcon = {
-            IconButton(onClick = onAtrasClick) {
-                Icon(Icons.Default.ArrowBackIosNew, contentDescription = "atras")
-            }
-        },
-        onAgregarMovClick = onAgregarMovClick,
-        onPerfilClick = onPerfilClick,
-        onConfigClick = onConfigClick,
-        onLogoutClick = onLogoutClick
-    ) {
-        ContenidoMovimientos(
-            movimientos = movimientosEjemplo,
-            onMovimientoClick = onMovimientoClick
-        )
-    }
+// mapeo de TransactionResponseDTO -> Movimiento
+
+private fun mapearMovimiento(
+    dto: TransactionResponseDTO,
+    viewModel: MovimientosViewModel
+): Movimiento {
+    val categoria = viewModel.obtenerCategoria(dto.categoriaId)
+    val tipoMov = if (dto.tipo == "INGRESO") TipoMovimiento.INGRESO else TipoMovimiento.GASTO
+
+    return Movimiento(
+        id = dto.id.toString(),
+        titulo = dto.descripcion,
+        categoria = categoria?.nombre ?: "Sin categoria",
+        monto = dto.monto,
+        tipo = tipoMov,
+        fecha = dto.fecha.substringBefore("T"),
+        hora = dto.fecha.substringAfter("T").take(5),
+        icono = mapearIcono(categoria?.icono)
+    )
 }
 
-// -------------------------------------------------------------
+// PANTALLA PRINCIPAL
+
+@Composable
+fun Movimientos(
+    viewModel: MovimientosViewModel = hiltViewModel(),
+    onMovimientoClick: (Movimiento) -> Unit = {},
+
+) {
+    val estado by viewModel.estado.collectAsState()
+
+
+        when (val estadoActual = estado) {
+            is TransaccionesState.Idle, is TransaccionesState.Cargando -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is TransaccionesState.Exitoso -> {
+                val movimientos = estadoActual.transacciones.map { mapearMovimiento(it, viewModel) }
+                ContenidoMovimientos(movimientos = movimientos, onMovimientoClick = onMovimientoClick)
+            }
+            is TransaccionesState.Error -> {
+                Text(
+                    text = estadoActual.mensaje,
+                    color = Color.Red,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+
+
+
 // CONTENIDO CON REUTILIZABLES
-// -------------------------------------------------------------
+
 @Composable
 private fun ContenidoMovimientos(
     movimientos: List<Movimiento>,
@@ -121,22 +132,23 @@ private fun ContenidoMovimientos(
 
     val agrupadosPorFecha = movimientosFiltrados.groupBy { it.fecha }
 
+    val totalIngresos = movimientos.filter { it.tipo == TipoMovimiento.INGRESO }.sumOf { it.monto }
+    val totalGastos = movimientos.filter { it.tipo == TipoMovimiento.GASTO }.sumOf { it.monto }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF8F9FA))
     ) {
-        // carta de balances
         AppSummaryCard(
             titulo = "Balance total",
-            montoPrincipal = 2358.51,
-            montoIngresos = 2550.00,
-            montoGastos = 209.49
+            montoPrincipal = totalIngresos - totalGastos,
+            montoIngresos = totalIngresos,
+            montoGastos = totalGastos
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // barra de busqueda
         AppSearchBar(
             query = textoBusqueda,
             onQueryChange = { textoBusqueda = it },
@@ -145,7 +157,6 @@ private fun ContenidoMovimientos(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // filtros (todos, ingresos gastos)
         AppFilterChips(
             opciones = listOf("Todos", "Ingresos", "Gastos"),
             seleccionado = filtroSeleccionado,
@@ -154,7 +165,6 @@ private fun ContenidoMovimientos(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // lista agrupada
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
@@ -173,7 +183,6 @@ private fun ContenidoMovimientos(
                     val esIngreso = mov.tipo == TipoMovimiento.INGRESO
                     val signo = if (esIngreso) "+" else "-"
 
-                    // fila de elemento
                     AppListItem(
                         titulo = mov.titulo,
                         subtitulo = "${mov.categoria} • ${mov.hora}",
@@ -191,12 +200,16 @@ private fun ContenidoMovimientos(
 }
 
 // -------------------------------------------------------------
-// PREVIEW
+// PREVIEW (sin ViewModel, con datos falsos, para que siga funcionando en el editor)
 // -------------------------------------------------------------
+private val movimientosPreview = listOf(
+    Movimiento("1", "Supermercado Walmart", "Comida", 125.50, TipoMovimiento.GASTO, "Hoy", "18:20", Icons.Default.ArrowBackIosNew)
+)
+
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun MovimientosPreview() {
     MaterialTheme {
-        Movimientos()
+        ContenidoMovimientos(movimientos = movimientosPreview, onMovimientoClick = {})
     }
 }

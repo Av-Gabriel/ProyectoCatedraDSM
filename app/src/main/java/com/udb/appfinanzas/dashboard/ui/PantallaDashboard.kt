@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -25,47 +25,50 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-//usamos el molde de la app
 @Composable
-fun PantallaDashboard()
-{
-    ScaffoldApp(title = "Dashboard",
-        navigationIcon = {Icon(Icons.Default.ArrowBackIosNew, contentDescription = null)} )
-    {
+fun PantallaDashboard() {
+
         Spacer(modifier = Modifier.height(24.dp))
-        Box(modifier = Modifier.fillMaxSize()){
-            //tarjeta que muestra monto semanal
-            ElevatedCard(elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        Box(modifier = Modifier.fillMaxSize()) {
+            // tarjeta que muestra monto semanal
+            ElevatedCard(
+                elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 modifier = Modifier
                     .size(width = 340.dp, height = 175.dp)
                     .padding(horizontal = 16.dp)
-                    .align(Alignment.TopCenter)){
-
-                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    .align(Alignment.TopCenter)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(24.dp)) {
+                        .padding(24.dp)
+                ) {
                     Text("Saldo Semanal", style = MaterialTheme.typography.labelMedium)
                     Spacer(modifier = Modifier.height(24.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically)
-                 {
-                        Icon(imageVector = Icons.Default.AttachMoney,
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AttachMoney,
                             contentDescription = null,
-                            modifier = Modifier.size(36.dp))
-                     Text("-143.23", fontSize = 40.sp, color = Color.Red)
-                 }
+                            modifier = Modifier.size(36.dp)
+                        )
+                        Text("-143.23", fontSize = 40.sp, color = Color.Red)
+                    }
                 }
             }
         }
     }
-}
 
-//Preview
-@Preview(showBackground = true,
-    showSystemUi = true)
+
+// preview
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun DashboardPreview(){
-    MaterialTheme{
-        PantallaDashboard()
+private fun DashboardPreview() {
+    MaterialTheme {
+        val navControllerMock = rememberNavController()
+        ScaffoldApp(navController = navControllerMock, title = "Dashboard")
+        {
+            PantallaDashboard()
+        }
     }
 }

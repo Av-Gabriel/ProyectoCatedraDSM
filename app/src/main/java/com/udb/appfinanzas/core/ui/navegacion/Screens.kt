@@ -10,6 +10,11 @@ object Registro
 
 @Serializable
 object Dashboard
-
+@Serializable
+object Movimientos
 @Serializable
 object Presupuesto
+@Serializable
+object Noticias
+@Serializable
+object Historial

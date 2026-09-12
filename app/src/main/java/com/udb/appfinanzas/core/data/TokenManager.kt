@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import android.content.Context
+import androidx.datastore.preferences.core.longPreferencesKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,6 +16,8 @@ class TokenManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val tokenKey = stringPreferencesKey("auth_token")
+    private val userIdKey = longPreferencesKey("user_id")
+
 
     val tokenFlow: Flow<String?> = context.dataStore.data.map { prefs -> prefs[tokenKey] }
 
@@ -26,5 +29,13 @@ class TokenManager @Inject constructor(
 
     suspend fun clearToken() {
         context.dataStore.edit { prefs -> prefs.remove(tokenKey) }
+    }
+
+    suspend fun saveUserId(userId: Long){
+        context.dataStore.edit { prefs -> prefs[userIdKey] = userId }
+    }
+
+    suspend fun getUserIdSync(): Long? {
+        return context.dataStore.data.map { prefs -> prefs[userIdKey] }.first()
     }
 }

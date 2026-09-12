@@ -35,12 +35,6 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MiPerfil() {
-    ScaffoldApp(
-        title = "Mi Perfil",
-        navigationIcon = {
-            Icon(Icons.Default.ArrowBackIosNew, contentDescription = "Regresar")
-        }
-    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +130,7 @@ fun MiPerfil() {
             }
         }
     }
-}
+
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable

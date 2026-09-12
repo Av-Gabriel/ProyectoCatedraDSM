@@ -17,21 +17,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Newspaper
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.AttachMoney
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Newspaper
-import androidx.compose.material.icons.rounded.Analytics
-import androidx.compose.material.icons.rounded.AttachMoney
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -46,7 +39,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,26 +49,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-// -------------------------------------------------------------
-// SCAFFOLD PRINCIPAL
-// -------------------------------------------------------------
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavOptionsBuilder
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.udb.appfinanzas.core.ui.navegacion.Dashboard
+import com.udb.appfinanzas.core.ui.navegacion.Movimientos
+import com.udb.appfinanzas.core.ui.navegacion.Noticias
+import com.udb.appfinanzas.core.ui.navegacion.Presupuesto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldApp(
     title: String,
+    mostrarTopBar: Boolean = true,
+    mostrarBottomBar: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
-    onAgregarMovClick: () -> Unit = {},
+    navController: NavController,
+    onPresupuestoClick: () -> Unit = {},
+    onNoticiasClick: () -> Unit = {},
+    onAgregarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {},
     onAtrasClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onPerfilClick: () -> Unit = {},
-    tabSeleccionadoInicial: Int = 0,
     content: @Composable () -> Unit
 ) {
     var menuExpandido by remember { mutableStateOf(false) }
-    var tabSeleccionado by remember { mutableIntStateOf(tabSeleccionadoInicial) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val destinoActual = navBackStackEntry?.destination
 
     Scaffold(
         containerColor = AppTheme.colors.background,
@@ -119,9 +123,9 @@ fun ScaffoldApp(
         },
         bottomBar = {
             BottomNavBar(
-                seleccionado = tabSeleccionado,
-                onTabClick = { tabSeleccionado = it },
-                onAgregarClick = onAgregarMovClick
+                navController = navController,
+                destinoActual = destinoActual,
+                onAgregarClick = onAgregarClick
             )
         }
     ) { innerPadding ->
@@ -136,10 +140,9 @@ fun ScaffoldApp(
     }
 }
 
-// -------------------------------------------------------------
-// BARRA INFERIOR TRADICIONAL — pegada al borde, 5 items con el
-// mismo peso (4 navegación + agregar), sin agrupamientos raros.
-// -------------------------------------------------------------
+
+// barra inferior tradicional pegada al borde 5 items
+
 
 private val iconosNav = listOf(
     Icons.Rounded.Home,
@@ -148,10 +151,23 @@ private val iconosNav = listOf(
     Icons.Outlined.Newspaper
 )
 
+
+// estructura que une el icono con su ruta typesafe
+private data class ItemNav(
+    val ruta: Any,
+    val icono: ImageVector
+)
+
+private val itemsNavegacion = listOf(
+    ItemNav(Dashboard, Icons.Rounded.Home),
+    ItemNav(Presupuesto, Icons.Outlined.Analytics),
+    ItemNav(Movimientos, Icons.Outlined.AttachMoney),
+    ItemNav(Noticias, Icons.Outlined.Newspaper)
+)
 @Composable
 private fun BottomNavBar(
-    seleccionado: Int,
-    onTabClick: (Int) -> Unit,
+    navController: NavController,
+    destinoActual: NavDestination?,
     onAgregarClick: () -> Unit
 ) {
     Surface(color = AppTheme.colors.bottomBar) {
@@ -165,18 +181,19 @@ private fun BottomNavBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Primeros 2 iconos
-                iconosNav.take(2).forEachIndexed { index, icono ->
+                // primeros 2 iconos
+                itemsNavegacion.take(2).forEach { item ->
+                    val activo = destinoActual?.hasRoute(item.ruta::class) == true
                     NavIconoItem(
-                        icono = icono,
-                        activo = seleccionado == index,
-                        onClick = { onTabClick(index) },
+                        icono = item.icono,
+                        activo = activo,
+                        onClick = { navController.navegarSeguro(item.ruta) },
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                // boton central de agregar, mismo peso que el resto,
-                // asi la fila queda pareja y no agrupada a un lado.
+                // boton central de agregar mismo peso que el resto
+                // asi la fila queda pareja y no agrupada a un lado
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
@@ -197,13 +214,13 @@ private fun BottomNavBar(
                     }
                 }
 
-                // Últimos 2 iconos
-                iconosNav.takeLast(2).forEachIndexed { i, icono ->
-                    val index = i + 2
+                // ultimos 2 iconos
+                itemsNavegacion.takeLast(2).forEach { item ->
+                    val activo = destinoActual?.hasRoute(item.ruta::class) == true
                     NavIconoItem(
-                        icono = icono,
-                        activo = seleccionado == index,
-                        onClick = { onTabClick(index) },
+                        icono = item.icono,
+                        activo = activo,
+                        onClick = { navController.navegarSeguro(item.ruta) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -243,15 +260,31 @@ private fun NavIconoItem(
     }
 }
 
-// -------------------------------------------------------------
-// PREVIEW
-// -------------------------------------------------------------
+
+//funcion para navegacion segura
+private fun NavController.navegarSeguro(ruta: Any) {
+    val builder: NavOptionsBuilder.() -> Unit = {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+
+    when (ruta) {
+        is Dashboard -> navigate(ruta, builder)
+        is Presupuesto -> navigate(ruta, builder)
+        is Movimientos -> navigate(ruta, builder)
+        is Noticias -> navigate(ruta, builder)
+    }
+}
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
 @Composable
 private fun DashboardPreview() {
     AppTheme {
-        ScaffoldApp(title = "Pruebas") {
+        ScaffoldApp(navController = rememberNavController(),
+            title = "Pruebas") {
             Text("Prueba")
         }
     }
