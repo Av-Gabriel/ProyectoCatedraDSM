@@ -32,6 +32,7 @@ interface ApiService {
 
     @POST("api/transactions")
     suspend fun registrarTransaccion(
+        @Query("userId") userId: Long,
         @Body transaccion: TransactionRegistroDTO // convierte el objeto a JSON
     ): Response<TransactionResponseDTO> // devuelve la transaccion creada usualmente incluye el ID generado
 

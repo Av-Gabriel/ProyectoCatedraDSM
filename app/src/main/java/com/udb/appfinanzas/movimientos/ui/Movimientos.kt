@@ -87,25 +87,27 @@ fun Movimientos(
     val estado by viewModel.estado.collectAsState()
 
 
-        when (val estadoActual = estado) {
-            is TransaccionesState.Idle, is TransaccionesState.Cargando -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            }
-            is TransaccionesState.Exitoso -> {
-                val movimientos = estadoActual.transacciones.map { mapearMovimiento(it, viewModel) }
-                ContenidoMovimientos(movimientos = movimientos, onMovimientoClick = onMovimientoClick)
-            }
-            is TransaccionesState.Error -> {
-                Text(
-                    text = estadoActual.mensaje,
-                    color = Color.Red,
-                    modifier = Modifier.padding(16.dp)
-                )
+    when (val estadoActual = estado) {
+        is TransaccionesState.Idle, is TransaccionesState.Cargando -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
             }
         }
+
+        is TransaccionesState.Exitoso -> {
+            val movimientos = estadoActual.transacciones.map { mapearMovimiento(it, viewModel) }
+            ContenidoMovimientos(movimientos = movimientos, onMovimientoClick = onMovimientoClick)
+        }
+
+        is TransaccionesState.Error -> {
+            Text(
+                text = estadoActual.mensaje,
+                color = Color.Red,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
     }
+}
 
 
 

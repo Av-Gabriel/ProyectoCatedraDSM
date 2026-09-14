@@ -69,8 +69,6 @@ fun ScaffoldApp(
     mostrarBottomBar: Boolean = true,
     navigationIcon: @Composable () -> Unit = {},
     navController: NavController,
-    onPresupuestoClick: () -> Unit = {},
-    onNoticiasClick: () -> Unit = {},
     onAgregarClick: () -> Unit = {},
     onConfigClick: () -> Unit = {},
     onAtrasClick: () -> Unit = {},

@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "com.udb.appfinanzas"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"

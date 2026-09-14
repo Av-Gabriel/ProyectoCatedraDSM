@@ -18,3 +18,5 @@ object Presupuesto
 object Noticias
 @Serializable
 object Historial
+@Serializable
+object AgregarMovimiento

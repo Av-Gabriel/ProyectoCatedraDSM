@@ -7,6 +7,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -19,9 +20,13 @@ import com.udb.appfinanzas.auth.ui.PantallaRegistro
 import com.udb.appfinanzas.auth.ui.registro.RegistroState
 import com.udb.appfinanzas.auth.ui.registro.RegistroViewModel
 import com.udb.appfinanzas.dashboard.ui.PantallaDashboard
+import com.udb.appfinanzas.movimientos.ui.AgregarMovimiento
+import com.udb.appfinanzas.movimientos.ui.AgregarMovimientoViewModel
 import com.udb.appfinanzas.movimientos.ui.Movimientos
 import com.udb.appfinanzas.noticias.ui.Noticias
 import com.udb.appfinanzas.presupuesto.ui.Presupuesto
+import com.udb.appfinanzas.transacciones.GuardarTransaccionState
+
 // Asegúrate de importar tu ScaffoldApp correctamente aquí
 
 @Composable
@@ -32,9 +37,10 @@ fun NavigationWrapper() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val destinoActual = navBackStackEntry?.destination
 
-    // lo oculto en login y registro
+    // oculto el top y bottom bar en login registro y agregar movimiento
     val mostrarBarras = destinoActual?.hasRoute(Login::class) == false &&
-            destinoActual?.hasRoute(Registro::class) == false
+            destinoActual?.hasRoute(Registro::class) == false &&
+            destinoActual?.hasRoute(AgregarMovimiento::class) ==false
 
     // titulo de topbar con la ruta que este seleccionada
     val tituloTopBar = when {
@@ -47,6 +53,7 @@ fun NavigationWrapper() {
 
     // scaffold
     ScaffoldApp(
+        onAgregarClick = { navController.navigate(AgregarMovimiento) },
         navController = navController,
         title = tituloTopBar,
         mostrarTopBar = mostrarBarras,
@@ -100,6 +107,18 @@ fun NavigationWrapper() {
             // pantallas
             composable<Movimientos> {
                 Movimientos()
+            }
+
+            composable<AgregarMovimiento>{
+                val agregarViewModel: AgregarMovimientoViewModel = hiltViewModel()
+                val guardarState by agregarViewModel.guardarTransaccionState.collectAsState()
+
+                LaunchedEffect(guardarState) {
+                    if(guardarState is GuardarTransaccionState.Exitoso){
+                        navController.popBackStack()
+                    }
+                }
+                AgregarMovimiento(viewModel = agregarViewModel)
             }
 
             composable<Dashboard> {
