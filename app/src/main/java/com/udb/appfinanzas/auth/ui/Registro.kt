@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +40,14 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.udb.appfinanzas.auth.ui.registro.RegistroState
 
 @Composable
 fun PantallaRegistro(
     //parametros a pasar son nombre, email, password, confirmPassword
     onRegistroClick: (String, String, String, String) -> Unit = { _, _, _, _ -> },
-    onLoginClick: () -> Unit = {}
+    onLoginClick: () -> Unit = {},
+    estado: RegistroState = RegistroState.Idle
 ) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -154,16 +157,37 @@ fun PantallaRegistro(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            when (val estadoActual = estado) {
+                is RegistroState.Cargando -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text("  Creando cuenta...", style = MaterialTheme.typography.bodyMedium)
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                is RegistroState.Error -> {
+                    Text(
+                        text = estadoActual.mensaje,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+                else -> Unit
+            }
+
             // boton registrarse
             Button(
                 onClick = { onRegistroClick(nombre, email, password, confirmPassword) },
+                enabled = estado !is RegistroState.Cargando,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(AppTheme.colors.iconActivo)
                 
             ) {
-                Text("Registrarse")
+                Text(if (estado is RegistroState.Cargando) "Registrando..." else "Registrarse")
             }
         }
 

@@ -1,5 +1,6 @@
 package com.udb.appfinanzas.network
 
+import com.udb.appfinanzas.BuildConfig
 import com.udb.appfinanzas.core.data.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -16,8 +17,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    private const val BASE_URL = "http://192.168.1.7:8081/"
 
     @Provides
     @Singleton
@@ -36,7 +35,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
-        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+        HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
+        }
 
     @Provides
     @Singleton
@@ -51,7 +52,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(BuildConfig.API_BASE_URL)
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

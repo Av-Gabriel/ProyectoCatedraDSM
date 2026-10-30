@@ -9,6 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import com.udb.appfinanzas.core.ui.navegacion.NavigationWrapper
+import com.udb.appfinanzas.core.ui.AccesoRedLocal
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -18,7 +19,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MaterialTheme{
-                NavigationWrapper()
+                AccesoRedLocal {
+                    NavigationWrapper()
+                }
             }
         }
     }

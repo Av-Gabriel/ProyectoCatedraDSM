@@ -40,6 +40,7 @@ import com.udb.appfinanzas.core.ui.components.AppSearchBar
 import com.udb.appfinanzas.core.ui.components.AppSummaryCard
 import com.udb.appfinanzas.transacciones.TransaccionesState
 import com.udb.appfinanzas.transacciones.TransactionResponseDTO
+import com.udb.appfinanzas.core.ui.ActualizarAlReanudar
 
 enum class TipoMovimiento { INGRESO, GASTO }
 
@@ -85,6 +86,7 @@ fun Movimientos(
 
 ) {
     val estado by viewModel.estado.collectAsState()
+    ActualizarAlReanudar { viewModel.cargarTodo() }
 
 
     when (val estadoActual = estado) {
@@ -171,6 +173,15 @@ private fun ContenidoMovimientos(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(bottom = 16.dp)
         ) {
+            if (movimientosFiltrados.isEmpty()) {
+                item {
+                    Text(
+                        text = if (movimientos.isEmpty()) "Aún no hay movimientos. Usa el botón + para agregar el primero." else "No hay resultados para esta búsqueda.",
+                        color = Color(0xFF7A7F8C),
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
             agrupadosPorFecha.forEach { (fecha, listaMovs) ->
                 item {
                     Text(

@@ -42,7 +42,8 @@ fun PantallaLogin(
     estado: LoginState,
     onLoginClick: (String, String) -> Unit = { _, _ -> },//aqui se pondria email y password como parametros
     onOlvideClick: () -> Unit = {},
-    onRegistroClick: () -> Unit = {}
+    onRegistroClick: () -> Unit = {},
+    mensajeInformativo: String? = null
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -83,6 +84,11 @@ fun PantallaLogin(
             )
 
             Spacer(modifier = Modifier.height(40.dp))
+
+            if (mensajeInformativo != null) {
+                Text(mensajeInformativo, color = AppTheme.colors.ingreso, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             // Campo correo
             OutlinedTextField(

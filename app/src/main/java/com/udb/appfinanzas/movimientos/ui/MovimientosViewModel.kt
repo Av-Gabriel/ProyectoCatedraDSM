@@ -28,6 +28,7 @@ class MovimientosViewModel @Inject constructor(
     }
 
     fun cargarTodo() {
+        if (_estado.value is TransaccionesState.Cargando) return
         viewModelScope.launch {
             _estado.value = TransaccionesState.Cargando
             val userId = tokenManager.getUserIdSync()

@@ -74,6 +74,7 @@ fun ScaffoldApp(
     onAtrasClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onPerfilClick: () -> Unit = {},
+    onHistorialClick: () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     var menuExpandido by remember { mutableStateOf(false) }
@@ -132,7 +133,7 @@ fun ScaffoldApp(
                             )
                             DropdownMenuItem(
                                 text = { Text("Historial") },
-                                onClick = { menuExpandido = false; onConfigClick() },
+                                onClick = { menuExpandido = false; onHistorialClick() },
                                 leadingIcon = {
                                     Icon(
                                         Icons.Default.History,

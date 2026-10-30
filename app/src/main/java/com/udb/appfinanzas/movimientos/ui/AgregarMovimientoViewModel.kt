@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import com.udb.appfinanzas.transacciones.TransactionRegistroDTO
+import com.udb.appfinanzas.network.mensajeDeError
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,6 +58,7 @@ class AgregarMovimientoViewModel @Inject constructor(
     }
 
     fun guardarTransaccion(monto: String, fecha: String, descripcion: String, categoriaId: Long?) {
+        if (_guardarTransaccionState.value is GuardarTransaccionState.Cargando) return
         viewModelScope.launch {
             val userId = tokenManager.getUserIdSync()
             if(userId == null){
@@ -68,9 +70,13 @@ class AgregarMovimientoViewModel @Inject constructor(
                 _guardarTransaccionState.value = GuardarTransaccionState.Error("Obligatorio seleccionar Categoria")
                 return@launch
             }
-            val montoDecimal = monto.toDoubleOrNull()
-            if (montoDecimal == null){
-                _guardarTransaccionState.value = GuardarTransaccionState.Error("El monto debe ser un numero valido")
+            val montoDecimal = monto.trim().replace(',', '.').toDoubleOrNull()
+            if (montoDecimal == null || !montoDecimal.isFinite() || montoDecimal <= 0){
+                _guardarTransaccionState.value = GuardarTransaccionState.Error("El monto debe ser un número mayor que cero")
+                return@launch
+            }
+            if (descripcion.isBlank()) {
+                _guardarTransaccionState.value = GuardarTransaccionState.Error("Agrega una descripción al movimiento")
                 return@launch
             }
             _guardarTransaccionState.value = GuardarTransaccionState.Cargando
@@ -79,14 +85,14 @@ class AgregarMovimientoViewModel @Inject constructor(
                 val request = TransactionRegistroDTO(
                     monto = montoDecimal,
                     fecha = fecha,
-                    descripcion = descripcion,
+                    descripcion = descripcion.trim(),
                     categoriaId = categoriaId
                 )
                 val response = apiService.registrarTransaccion(userId, request)
                 if(response.isSuccessful){
                     _guardarTransaccionState.value = GuardarTransaccionState.Exitoso
                 }else{
-                    _guardarTransaccionState.value = GuardarTransaccionState.Error("Error ${response.code()}: revisa los datos")
+                    _guardarTransaccionState.value = GuardarTransaccionState.Error(response.mensajeDeError("No se pudo guardar (HTTP ${response.code()})"))
                 }
 
             }catch (e: Exception){

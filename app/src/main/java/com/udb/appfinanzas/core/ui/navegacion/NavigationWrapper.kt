@@ -6,6 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -20,6 +23,7 @@ import com.udb.appfinanzas.auth.ui.PantallaRegistro
 import com.udb.appfinanzas.auth.ui.registro.RegistroState
 import com.udb.appfinanzas.auth.ui.registro.RegistroViewModel
 import com.udb.appfinanzas.dashboard.ui.PantallaDashboard
+import com.udb.appfinanzas.historial.ui.Historial as HistorialScreen
 import com.udb.appfinanzas.movimientos.ui.AgregarMovimiento
 import com.udb.appfinanzas.movimientos.ui.AgregarMovimientoViewModel
 import com.udb.appfinanzas.movimientos.ui.Movimientos
@@ -32,6 +36,7 @@ import com.udb.appfinanzas.transacciones.GuardarTransaccionState
 @Composable
 fun NavigationWrapper() {
     val navController = rememberNavController()
+    var registroCompletado by rememberSaveable { mutableStateOf(false) }
 
     // observamos la ruta actual globalmente
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -48,6 +53,7 @@ fun NavigationWrapper() {
         destinoActual?.hasRoute(Movimientos::class) == true -> "Mis Movimientos"
         destinoActual?.hasRoute(Presupuesto::class) == true -> "Presupuesto"
         destinoActual?.hasRoute(Noticias::class) == true -> "Noticias"
+        destinoActual?.hasRoute(Historial::class) == true -> "Historial"
         else -> "App Finanzas"
     }
 
@@ -63,7 +69,8 @@ fun NavigationWrapper() {
             navController.navigate(Login) {
                 popUpTo(0)
             }
-        }
+        },
+        onHistorialClick = { navController.navigate(Historial) }
     ) {
         // navhost dentro del scaffold
         NavHost(navController, startDestination = Login) {
@@ -83,7 +90,8 @@ fun NavigationWrapper() {
                 PantallaLogin(
                     estado = estado,
                     onLoginClick = { email, password -> loginViewModel.login(email, password) },
-                    onRegistroClick = { navController.navigate(Registro) }
+                    onRegistroClick = { registroCompletado = false; navController.navigate(Registro) },
+                    mensajeInformativo = if (registroCompletado) "Cuenta creada. Inicia sesión con tu correo y contraseña." else null
                 )
             }
 
@@ -93,14 +101,19 @@ fun NavigationWrapper() {
 
                 LaunchedEffect(estado) {
                     if (estado is RegistroState.Exitoso) {
-                        navController.navigate(Login)
+                        registroCompletado = true
+                        navController.navigate(Login) {
+                            popUpTo(Login) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     }
                 }
                 PantallaRegistro(
                     onRegistroClick = { nombre, email, password, confirmPassword ->
                         registroViewModel.registrar(nombre, email, password, confirmPassword)
                     },
-                    onLoginClick = { navController.popBackStack() }
+                    onLoginClick = { navController.popBackStack() },
+                    estado = estado
                 )
             }
 
@@ -127,6 +140,10 @@ fun NavigationWrapper() {
 
             composable<Noticias> {
                 Noticias()
+            }
+
+            composable<Historial> {
+                HistorialScreen()
             }
 
             composable<Presupuesto> {

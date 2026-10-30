@@ -1,0 +1,11 @@
+{
+  "name": "finanzas-udb-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API local compatible con la app Android Finanzas UDB",
+  "engines": { "node": ">=22.13.0" },
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test server.test.cjs"
+  }
+}

@@ -44,6 +44,7 @@ import com.udb.appfinanzas.categorias.data.CategoriasState
 import com.udb.appfinanzas.categorias.data.CategoryResponse
 import com.udb.appfinanzas.core.ui.components.AppDropdownMenu
 import com.udb.appfinanzas.core.ui.components.AppFilterChips
+import com.udb.appfinanzas.transacciones.GuardarTransaccionState
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -57,7 +58,9 @@ import java.util.TimeZone
 fun AgregarMovimiento(viewModel: AgregarMovimientoViewModel = hiltViewModel())
 {
     val categoriasState by viewModel.categoriasState.collectAsState()
+    val guardarState by viewModel.guardarTransaccionState.collectAsState()
     ContenidoAgregarMovimiento(categoriasState = categoriasState,
+    guardarState = guardarState,
     onGuardarClick = {monto, fecha, descripcion, categoriaId ->
         viewModel.guardarTransaccion(monto, fecha, descripcion, categoriaId)
     })
@@ -67,6 +70,7 @@ fun AgregarMovimiento(viewModel: AgregarMovimientoViewModel = hiltViewModel())
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
+                                       guardarState: GuardarTransaccionState = GuardarTransaccionState.Idle,
                                        onGuardarClick:(String, String, String, Long?) -> Unit = { _, _, _, _ -> }) {
     var tipoSeleccionado by remember { mutableStateOf("GASTO") }
     var monto by remember { mutableStateOf("") }
@@ -158,13 +162,17 @@ private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
                 )
             }
         }
+        if (guardarState is GuardarTransaccionState.Error) {
+            Text(guardarState.mensaje, color = MaterialTheme.colorScheme.error)
+        }
         Button(
             onClick = { onGuardarClick(monto, fecha, descripcion, categoriaSeleccionada?.id) },
+            enabled = guardarState !is GuardarTransaccionState.Cargando && categoriasState is CategoriasState.Exitoso,
             modifier = Modifier.fillMaxWidth()
                 .height(48.dp)
 
         ) {
-            Text("Guardar")
+            Text(if (guardarState is GuardarTransaccionState.Cargando) "Guardando..." else "Guardar")
         }
     }
 }
