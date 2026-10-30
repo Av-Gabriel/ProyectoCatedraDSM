@@ -5,6 +5,7 @@ import com.udb.appfinanzas.auth.data.LoginRequest
 import com.udb.appfinanzas.auth.data.RegistroRequest
 import com.udb.appfinanzas.auth.data.UserResponse
 import com.udb.appfinanzas.categorias.data.CategoryResponse
+import com.udb.appfinanzas.categorias.data.CategoryRegistroRequest
 import com.udb.appfinanzas.transacciones.TransactionRegistroDTO
 import com.udb.appfinanzas.transacciones.TransactionResponseDTO
 import retrofit2.Response
@@ -42,4 +43,10 @@ interface ApiService {
     suspend fun getCategorias(
         @Query("userId") userId: Long):
             Response<List<CategoryResponse>>
+
+    @POST("api/categories")
+    suspend fun crearCategoria(
+        @Query("userId") userId: Long,
+        @Body categoria: CategoryRegistroRequest
+    ): Response<CategoryResponse>
 }

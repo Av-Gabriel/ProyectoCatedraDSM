@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -24,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -33,6 +36,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.udb.appfinanzas.categorias.data.CategoriasState
 import com.udb.appfinanzas.categorias.data.CategoryResponse
+import com.udb.appfinanzas.categorias.data.CrearCategoriaState
+import com.udb.appfinanzas.categorias.ui.CrearCategoriaDialog
 import com.udb.appfinanzas.core.ui.components.AppDropdownMenu
 import com.udb.appfinanzas.core.ui.components.AppFilterChips
 import com.udb.appfinanzas.transacciones.GuardarTransaccionState
@@ -59,8 +68,12 @@ fun AgregarMovimiento(viewModel: AgregarMovimientoViewModel = hiltViewModel())
 {
     val categoriasState by viewModel.categoriasState.collectAsState()
     val guardarState by viewModel.guardarTransaccionState.collectAsState()
+    val crearCategoriaState by viewModel.crearCategoriaState.collectAsState()
     ContenidoAgregarMovimiento(categoriasState = categoriasState,
     guardarState = guardarState,
+    crearCategoriaState = crearCategoriaState,
+    onCrearCategoria = viewModel::crearCategoria,
+    onRestablecerCrearCategoria = viewModel::restablecerCrearCategoria,
     onGuardarClick = {monto, fecha, descripcion, categoriaId ->
         viewModel.guardarTransaccion(monto, fecha, descripcion, categoriaId)
     })
@@ -71,6 +84,9 @@ fun AgregarMovimiento(viewModel: AgregarMovimientoViewModel = hiltViewModel())
 @Composable
 private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
                                        guardarState: GuardarTransaccionState = GuardarTransaccionState.Idle,
+                                       crearCategoriaState: CrearCategoriaState = CrearCategoriaState.Idle,
+                                       onCrearCategoria: (String, String) -> Unit = { _, _ -> },
+                                       onRestablecerCrearCategoria: () -> Unit = {},
                                        onGuardarClick:(String, String, String, Long?) -> Unit = { _, _, _, _ -> }) {
     var tipoSeleccionado by remember { mutableStateOf("GASTO") }
     var monto by remember { mutableStateOf("") }
@@ -81,6 +97,15 @@ private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
     }
     var descripcion by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<CategoryResponse?>(null) }
+    var mostrarCrearCategoria by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(crearCategoriaState) {
+        if (crearCategoriaState is CrearCategoriaState.Exitoso) {
+            categoriaSeleccionada = crearCategoriaState.categoria
+            tipoSeleccionado = crearCategoriaState.categoria.tipo
+            mostrarCrearCategoria = false
+            onRestablecerCrearCategoria()
+        }
+    }
     //estado para controlar la visibilidad del datepicker
     var mostrarDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
@@ -89,9 +114,10 @@ private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
         .fillMaxSize()
         .background(Color.White)){
     Column(modifier = Modifier
-        .align(Alignment.Center)
-        .fillMaxWidth()
-        .padding(horizontal = 24.dp),
+        .fillMaxSize()
+        .imePadding()
+        .verticalScroll(rememberScrollState())
+        .padding(horizontal = 24.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
 
@@ -150,7 +176,20 @@ private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
                     opciones = categorias.filter { it.tipo == tipoSeleccionado }.map { it.nombre },
                     onOpcionSeleccionada = { nombreElegido ->
                         categoriaSeleccionada = categorias.find { it.nombre == nombreElegido  && it.tipo == tipoSeleccionado}
-                    })
+                    },
+                    modifier = Modifier.fillMaxWidth())
+
+                OutlinedButton(
+                    onClick = {
+                        onRestablecerCrearCategoria()
+                        mostrarCrearCategoria = true
+                    },
+                    enabled = guardarState !is GuardarTransaccionState.Cargando,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Text("Nueva categoría", modifier = Modifier.padding(start = 8.dp))
+                }
 
             }
 
@@ -176,6 +215,17 @@ private fun ContenidoAgregarMovimiento(categoriasState: CategoriasState,
         }
     }
 }
+    if (mostrarCrearCategoria) {
+        CrearCategoriaDialog(
+            tipoInicial = tipoSeleccionado,
+            estado = crearCategoriaState,
+            onCrear = onCrearCategoria,
+            onCerrar = {
+                mostrarCrearCategoria = false
+                onRestablecerCrearCategoria()
+            }
+        )
+    }
     if (mostrarDatePicker) {
         DatePickerDialog(
             onDismissRequest = { mostrarDatePicker = false },

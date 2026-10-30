@@ -73,3 +73,57 @@ test('registro, autenticación, categorías, movimientos y persistencia', async 
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test('categorías propias: validación, tipos, aislamiento y persistencia', async () => {
+  const directory = mkdtempSync(join(tmpdir(), 'finanzas-categorias-'));
+  const databasePath = join(directory, 'test.sqlite');
+  let api = await start(databasePath);
+  try {
+    const account = { nombre: 'Prueba categorías', correo: 'categorias@example.com', contrasena: 'SoloParaPrueba-123' };
+    await api.request('/api/users', { method: 'POST', body: account });
+    const { body: { token, userId } } = await api.request('/api/auth/login', { method: 'POST', body: account });
+    const path = `/api/categories?userId=${userId}`;
+    const body = { nombre: '  Educación  superior  ', tipo: 'GASTO' };
+    assert.equal((await api.request(path, { method: 'POST', body })).status, 401);
+    const created = await api.request(path, { method: 'POST', token, body });
+    assert.equal(created.status, 201);
+    assert.equal(created.body.nombre, 'Educación superior');
+    assert.equal(created.body.tipo, 'GASTO');
+    assert.equal(created.body.activo, true);
+    assert.equal(created.body.userId, userId);
+    assert.ok(Number.isSafeInteger(created.body.id));
+    assert.equal((await api.request(path, { method: 'POST', token, body: { nombre: 'EDUCACIÓN SUPERIOR', tipo: 'GASTO' } })).status, 409);
+    assert.equal((await api.request(path, { method: 'POST', token, body: { nombre: 'alimentación', tipo: 'GASTO' } })).status, 409);
+    for (const invalid of [
+      { nombre: '   ', tipo: 'GASTO' },
+      { nombre: 'a'.repeat(61), tipo: 'GASTO' },
+      { nombre: 'Salud', tipo: 'OTRO' }
+    ]) {
+      assert.equal((await api.request(path, { method: 'POST', token, body: invalid })).status, 400);
+    }
+    const income = await api.request(path, { method: 'POST', token, body: { nombre: 'Educación superior', tipo: 'INGRESO' } });
+    assert.equal(income.status, 201);
+    assert.equal(income.body.tipo, 'INGRESO');
+    const saved = await api.request(`/api/transactions?userId=${userId}`, {
+      method: 'POST', token,
+      body: { monto: 25.5, fecha: '2026-10-30T11:20:00', descripcion: 'Clases particulares', categoriaId: income.body.id }
+    });
+    assert.equal(saved.status, 201);
+    assert.equal(saved.body.tipo, 'INGRESO');
+    assert.equal(saved.body.categoriaId, income.body.id);
+    const secondAccount = { ...account, correo: 'otras-categorias@example.com' };
+    await api.request('/api/users', { method: 'POST', body: secondAccount });
+    const { body: second } = await api.request('/api/auth/login', { method: 'POST', body: secondAccount });
+    assert.equal((await api.request(`/api/categories?userId=${second.userId}`, { method: 'POST', token, body })).status, 403);
+    assert.equal((await api.request(path, { token: second.token })).status, 403);
+    assert.equal((await api.request(`/api/categories?userId=${second.userId}`, { method: 'POST', token: second.token, body })).status, 201);
+    await api.stop();
+    api = await start(databasePath);
+    const persisted = await api.request(path, { token });
+    assert.ok(persisted.body.some((category) => category.id === created.body.id && category.nombre === 'Educación superior'));
+    assert.ok(persisted.body.some((category) => category.id === income.body.id && category.tipo === 'INGRESO'));
+  } finally {
+    await api.stop();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

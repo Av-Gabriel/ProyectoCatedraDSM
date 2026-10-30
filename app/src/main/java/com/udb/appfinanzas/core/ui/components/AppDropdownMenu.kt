@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxWidth
 
 
 @Composable
@@ -35,7 +36,7 @@ fun AppDropdownMenu(
             onValueChange = {},
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor())
+            modifier = Modifier.fillMaxWidth().menuAnchor())
 
         ExposedDropdownMenu(expanded = expanded,
             onDismissRequest = {expanded = false }

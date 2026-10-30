@@ -155,6 +155,24 @@ function createApiServer({ databasePath = join(__dirname, '.data', 'finanzas.sql
         const categories = db.prepare('SELECT * FROM categories WHERE userId = ? ORDER BY id').all(userId);
         return send(response, 200, categories.map((category) => ({ ...category, activo: Boolean(category.activo) })));
       }
+      if (route === 'POST /api/categories') {
+        const userId = authorize(request, url);
+        const body = await readJson(request);
+        const nombre = text(body.nombre, 'nombre de la categoría', { max: 60 }).normalize('NFKC').replace(/\s+/gu, ' ').trim();
+        const tipo = body.tipo;
+        if (!nombre || nombre.length > 60) throw new ApiError(400, 'Escribe un nombre de entre 1 y 60 caracteres.');
+        if (!['GASTO', 'INGRESO'].includes(tipo)) throw new ApiError(400, 'Selecciona un tipo de categoría válido.');
+        const existentes = db.prepare('SELECT nombre FROM categories WHERE userId = ? AND tipo = ?').all(userId, tipo);
+        const nombreNormalizado = nombre.toLocaleLowerCase('es');
+        if (existentes.some((category) => category.nombre.normalize('NFKC').replace(/\s+/gu, ' ').trim().toLocaleLowerCase('es') === nombreNormalizado)) {
+          throw new ApiError(409, 'Ya tienes una categoría con ese nombre y tipo.');
+        }
+        const icono = tipo === 'INGRESO' ? 'work' : 'shopping_bag';
+        const color = '#2E7D63';
+        const { lastInsertRowid: id } = db.prepare('INSERT INTO categories (nombre, tipo, icono, color, userId) VALUES (?, ?, ?, ?, ?)')
+          .run(nombre, tipo, icono, color, userId);
+        return send(response, 201, { id: Number(id), nombre, tipo, icono, color, activo: true, userId });
+      }
       if (route === 'GET /api/transactions') {
         const userId = authorize(request, url);
         return send(response, 200, db.prepare(`
